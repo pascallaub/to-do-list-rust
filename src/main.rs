@@ -41,6 +41,11 @@ impl ToDoApp {
         let data = serde_json::to_string(&self.tasks).expect("Konnte Aufgabe nicht serialisieren!");
         fs::write("tasks.json", data).expect("Fehler beim schreiben!");
     }
+
+    fn remove_completed_tasks(&mut self) {
+        self.tasks.retain(|task| !task.completed);
+        self.save_tasks();
+    }
 }
 
 impl eframe::App for ToDoApp {
@@ -74,8 +79,10 @@ impl eframe::App for ToDoApp {
                 }
             });
 
-            if ui.button("Aufgabe speichern!").clicked() {
-                self.save_tasks();
+            if self.tasks.iter().any(|task| task.completed) {
+                if ui.button("Abgeschlossene Aufgaben entfernen!").clicked() {
+                    self.remove_completed_tasks();
+                }
             }
         });
     }
